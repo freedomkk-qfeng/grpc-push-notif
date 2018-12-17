@@ -14,7 +14,7 @@ import (
 	"math/rand"
 	"time"
 
-	pb "grpc-push-notif/protos"
+	pb "github.com/freedomkk-qfeng/grpc-push-notif/protos"
 
 	"google.golang.org/grpc"
 )
@@ -28,15 +28,15 @@ const (
 
 // register ...
 func register(client pb.PushNotifClient) error {
-	//log.Printf("Calling Register RPC")
+	log.Printf("Calling Register RPC")
 
 	resp, err := client.Register(context.Background(), &pb.RegistrationRequest{ClientName: name})
 	if err != nil {
 		log.Fatalf("Register failed %v", err)
 	}
-    log.Println("Registration Resp: ", resp, err)
-	// cookie = resp.ClientCookie
-	// log.Printf("Reg Response %s, %s, %v", resp.ClientName, resp.ServerName, resp.ClientCookie)
+	log.Println("Registration Resp: ", resp, err)
+	//cookie := resp.ClientCookie
+	log.Printf("Reg Response %s, %s", resp.ClientName, resp.ServerName)
 
 	return nil
 }
@@ -112,7 +112,7 @@ func main() {
 	// init important structures
 	subChan = make(chan pb.TopicType, 10)
 	rand.Seed(time.Now().UTC().UnixNano())
-	name = fmt.Sprintf("%s:%d", "Client", rand.Intn(50))
+	name = fmt.Sprintf("%d", rand.Intn(50))
 
 	// Setup a connection with the server
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
@@ -129,7 +129,5 @@ func main() {
 	// alerts as long as the connection is up
 	go subscribeToAlerts(client)
 
-	subscribeToModeChanges(subChan)
-	subscribeToTempChanges(subChan)
 	subscribe(client, subChan)
 }
